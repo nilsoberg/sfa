@@ -6,11 +6,17 @@ class Clients:
     def __init__(self, callback_url, clients):
         self.KBaseReport = clients["KBaseReport"](callback_url)
 
+
 class Core:
-    def __init__(self, ctx, config):
+    def __init__(self, ctx, config, clients_class=None):
+
+        ClientsClass = Clients
+        if clients_class:
+            ClientsClass = clients_class
+
         self.callback_url = config.get("callback_url")
         self.ctx = ctx
-        self.clients = Clients(self.callback_url, config["clients"])
+        self.clients = ClientsClass(self.callback_url, config["clients"])
 
     def do_analysis(self, params:dict):
         self.validate_do_analysis(params)
@@ -44,3 +50,4 @@ class Core:
             raise Exception(
                 "Please provide a between 0 and 100 for param_4"
             )
+
