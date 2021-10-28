@@ -15,9 +15,10 @@ class Core:
         if clients_class:
             ClientsClass = clients_class
 
-        self.callback_url = config.get("callback_url")
         self.ctx = ctx
+        self.callback_url = config.get("callback_url")
         self.clients = ClientsClass(self.callback_url, config["clients"])
+        self.shared_folder = config.get("shared_folder")
 
     def do_analysis(self, params:dict):
         self.validate_do_analysis(params)
