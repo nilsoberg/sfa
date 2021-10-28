@@ -4,7 +4,8 @@ __version__ = '0.1'
 
 class Clients:
     def __init__(self, callback_url, clients):
-        self.KBaseReport = clients["KBaseReport"](callback_url)
+        for client_name, Client in clients.items():
+            self.__setattr__(client_name, Client(callback_url))
 
 
 class Core:
@@ -50,4 +51,3 @@ class Core:
             raise Exception(
                 "Please provide a between 0 and 100 for param_4"
             )
-
