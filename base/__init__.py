@@ -1,4 +1,8 @@
 """An amazing sample package!"""
+import logging
+import os
+
+from jinja2 import DictLoader, Environment, select_autoescape
 
 __version__ = '0.1'
 
@@ -10,7 +14,6 @@ class Clients:
 
 class Core:
     def __init__(self, ctx, config, clients_class=None):
-
         ClientsClass = Clients
         if clients_class:
             ClientsClass = clients_class
@@ -19,6 +22,46 @@ class Core:
         self.callback_url = config.get("callback_url")
         self.clients = ClientsClass(self.callback_url, config["clients"])
         self.shared_folder = config.get("shared_folder")
+
+    def create_report_from_template(self, template_path, config):
+        logging.info("Creating report...")
+        # Create report from template
+        with open(template_path) as tpf:
+            template_source = tpf.read()
+        env = Environment(
+            loader=DictLoader(dict(template=template_source)),
+            autoescape=select_autoescape(default=False)
+        )
+        template = env.get_template("template")
+        report = template.render(**config["template_variables"])
+        # Create report object including report
+        report_name = config["report_name"]
+        reports_path = config["reports_path"]
+        workspace_name = config["workspace_name"]
+        os.makedirs(reports_path, exist_ok=True)
+        report_path = os.path.join(reports_path, "index.html")
+        with open(report_path, "w") as report_file:
+            report_file.write(report)
+        html_links = [
+            {
+                "description": "report",
+                "name": "index.html",
+                "path": reports_path,
+            },
+        ]
+        report_info = self.report.create_extended_report(
+            {
+                "direct_html_link_index": 0,
+                "html_links": html_links,
+                "message": "A sample report.",
+                "report_object_name": report_name,
+                "workspace_name": workspace_name,
+            }
+        )
+        return {
+            "report_name": report_info["name"],
+            "report_ref": report_info["ref"],
+        }
 
     def do_analysis(self, params:dict):
         self.validate_do_analysis(params)
