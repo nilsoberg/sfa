@@ -9,7 +9,11 @@ __version__ = '0.1'
 class Clients:
     def __init__(self, callback_url, clients):
         for client_name, Client in clients.items():
-            self.__setattr__(client_name, Client(callback_url))
+            if callable(Client):
+                client_val = Client(callback_url)
+            else:
+                client_val = Client
+            self.__setattr__(client_name, client_val)
 
 
 class Core:
